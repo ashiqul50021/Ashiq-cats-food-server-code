@@ -19,6 +19,7 @@ async function run() {
     const allproductscollection = database.collection('allproducts');
     const placeOrdersCollection = database.collection('placeorders');
     const usersCollection = database.collection('users');
+    const reviewCollection = database.collection('review');
     console.log('database connected successfully')
 
       // get products api
@@ -26,6 +27,12 @@ async function run() {
         const cursor = allproductscollection.find({});
         const allproducts = await cursor.toArray();
         res.send(allproducts);
+    });
+    // get review api
+      app.get('/review', async(req, res) =>{
+        const cursor = reviewCollection.find({});
+        const review = await cursor.toArray();
+        res.send(review);
     });
 
     // get single product
@@ -47,6 +54,38 @@ async function run() {
       console.log(result);
       res.json(result)
   });
+  // review post api 
+  app.post('/review', async (req, res) => {
+    const review = req.body;
+    console.log('hit the post api', review);
+  
+    const result = await reviewCollection.insertOne(review);
+    console.log(result);
+    res.json(result)
+});
+  // delete product api
+  app.delete('/allproducts/:id', async(req, res) => {
+    const id = req.params.id;
+    const query = {_id:ObjectId(id)};
+    const result = await allproductscollection.deleteOne(query);
+    res.json(result);
+})
+
+// delete orders
+  app.delete('/placeorders/:id', async(req, res) => {
+    const id = req.params.id;
+    const query = {_id:ObjectId(id)};
+    const result = await placeOrdersCollection.deleteOne(query);
+    res.json(result);
+})
+
+// delete purchases
+app.delete('/purchases', async(req, res) => {
+  const email = req.query.email;
+  const query = { email: email };
+  const result = await placeOrdersCollection.deleteOne(query);
+  res.json(result);
+})
 
   // get orders api
   app.get('/placeorders', async(req, res) =>{
